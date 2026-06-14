@@ -1303,6 +1303,31 @@ def run_approved_command(
 
 
 
+@mcp.tool()
+def market_watch(
+    symbols: list[str] | None = None,
+    news_status: str = "Manual check required",
+    spread_text: str | None = None,
+    target: str | None = None,
+    send_only_on_entry: bool = True,
+    force_send: bool = False,
+    timeframe: str = "5m",
+) -> dict[str, Any]:
+    """Scan M5 market (XAUUSD, GBPUSD, EURUSD) buat liquidity sweep — deteksi entry, S&R, dan risk reward."""
+    return invoke(
+        "market_watch_tool",
+        "run_market_watch",
+        news_status=news_status,
+        spread_text=spread_text,
+        target=target,
+        symbols=symbols,
+        send_only_on_entry=send_only_on_entry,
+        force_send=force_send,
+        timeframe=timeframe,
+    )
+
+
+
 def main() -> None:
     """Jalankan Jenny Tools sebagai MCP stdio server."""
     mcp.run()
