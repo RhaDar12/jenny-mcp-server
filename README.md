@@ -22,6 +22,7 @@ Dibangun dengan arsitektur **stdio MCP** + **privileged approval system**, cocok
 | **🎨 ComfyUI** | Generate gambar via ComfyUI lokal |
 | **🐙 GitHub CLI** | Cek auth, repo list/view/clone, SSH key management |
 | **🔐 Credential Diagnostics** | Periksa token & SSH key tanpa mengekspos isinya |
+| **📊 Market Watch** | Scan XAUUSD/GBPUSD/EURUSD M5 — liquidity sweep, S&R, R:R, session filter |
 
 ## 🏗️ Arsitektur
 
@@ -121,6 +122,7 @@ Semua tool diregistrasi dengan prefix `mcp_jenny_tools_`:
 | `mcp_jenny_tools_roblox_hierarchy` | Baca hierarchy Studio |
 | `mcp_jenny_tools_comfy_generate` | Generate gambar |
 | `mcp_jenny_tools_document_read` | Baca DOCX/XLSX/PDF |
+| `mcp_jenny_tools_market_watch` | Scan M5 market — liquidity sweep entry |
 | ...dan 30+ tool lainnya | |
 
 ## 📁 Struktur Folder
