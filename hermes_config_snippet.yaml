@@ -1,0 +1,19 @@
+mcp_servers:
+  jenny_tools:
+    command: "py"
+    args:
+      - "C:\\AI-Agent\\mcp\\jenny_mcp_server.py"
+    env:
+      JENNY_TOOLS_DIR: "C:\\AI-Agent\\tools"
+      JENNY_MCP_LOG_DIR: "C:\\AI-Agent\\logs"
+      JENNY_APPROVAL_DIR: "C:\\AI-Agent\\approvals"
+      JENNY_SHELL_ROOT: "C:\\AI-Agent"
+      # Jangan simpan ROBLOX_OPEN_CLOUD_API_KEY di file config ini.
+      # Atur sebagai environment variable Windows agar diwariskan ke Hermes.
+    enabled: true
+    connect_timeout: 30
+    timeout: 900
+    supports_parallel_tool_calls: false
+    tools:
+      resources: false
+      prompts: false
