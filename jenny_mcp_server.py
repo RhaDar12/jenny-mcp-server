@@ -1327,6 +1327,138 @@ def market_watch(
     )
 
 
+# ---------------------------------------------------------------------------
+# MT5 TRADING — READ-ONLY (no confirmation needed)
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def mt5_account() -> dict[str, Any]:
+    """Cek informasi akun MT5 — balance, equity, margin, leverage."""
+    return invoke("mt5_trading_tool", "mt5_account_info")
+
+
+@mcp.tool()
+def mt5_positions() -> dict[str, Any]:
+    """Daftar posisi terbuka di MT5 — ticket, symbol, profit, SL/TP."""
+    return invoke("mt5_trading_tool", "mt5_positions")
+
+
+@mcp.tool()
+def mt5_pending_orders() -> dict[str, Any]:
+    """Daftar pending order MT5 — buy/sell limit/stop."""
+    return invoke("mt5_trading_tool", "mt5_pending_orders")
+
+
+@mcp.tool()
+def mt5_trade_history(days: int = 7) -> dict[str, Any]:
+    """Riwayat transaksi MT5 N hari terakhir."""
+    return invoke("mt5_trading_tool", "mt5_trade_history", days=days)
+
+
+# ---------------------------------------------------------------------------
+# MT5 TRADING — PRIVILEGED (need user confirmation)
+# ---------------------------------------------------------------------------
+
+from jenny_privileged_tools import (
+    mt5_market_order as privileged_mt5_market_order,
+    mt5_modify_trade as privileged_mt5_modify_trade,
+    mt5_close_trade as privileged_mt5_close_trade,
+    mt5_create_pending as privileged_mt5_create_pending,
+    mt5_cancel_order as privileged_mt5_cancel_order,
+)
+
+
+@mcp.tool()
+def mt5_order(
+    symbol: str,
+    action: str,  # "buy" or "sell"
+    volume: float,
+    sl: float | None = None,
+    tp: float | None = None,
+    comment: str = "Jenny MCP",
+) -> dict[str, Any]:
+    """
+    Eksekusi market order (buy/sell) di MT5.
+    PRIVILEGED — butuh konfirmasi sebelum eksekusi.
+    """
+    return privileged_mt5_market_order(
+        symbol=symbol,
+        action=action,
+        volume=volume,
+        sl=sl,
+        tp=tp,
+        comment=comment,
+    )
+
+
+@mcp.tool()
+def mt5_modify(
+    ticket: int,
+    sl: float | None = None,
+    tp: float | None = None,
+) -> dict[str, Any]:
+    """
+    Ubah SL/TP dari posisi terbuka di MT5.
+    PRIVILEGED — butuh konfirmasi sebelum eksekusi.
+    """
+    return privileged_mt5_modify_trade(
+        ticket=ticket,
+        sl=sl,
+        tp=tp,
+    )
+
+
+@mcp.tool()
+def mt5_close(
+    ticket: int,
+    volume: float | None = None,
+) -> dict[str, Any]:
+    """
+    Tutup posisi terbuka di MT5.
+    PRIVILEGED — butuh konfirmasi sebelum eksekusi.
+    """
+    return privileged_mt5_close_trade(
+        ticket=ticket,
+        volume=volume,
+    )
+
+
+@mcp.tool()
+def mt5_pending(
+    symbol: str,
+    action: str,  # buy_limit, sell_limit, buy_stop, sell_stop
+    volume: float,
+    price: float,
+    sl: float | None = None,
+    tp: float | None = None,
+    comment: str = "Jenny MCP",
+    expiration: float | None = None,
+) -> dict[str, Any]:
+    """
+    Buat pending order di MT5.
+    PRIVILEGED — butuh konfirmasi sebelum eksekusi.
+    """
+    return privileged_mt5_create_pending(
+        symbol=symbol,
+        action=action,
+        volume=volume,
+        price=price,
+        sl=sl,
+        tp=tp,
+        comment=comment,
+        expiration=expiration,
+    )
+
+
+@mcp.tool()
+def mt5_cancel(ticket: int) -> dict[str, Any]:
+    """
+    Batalkan pending order di MT5.
+    PRIVILEGED — butuh konfirmasi sebelum eksekusi.
+    """
+    return privileged_mt5_cancel_order(ticket=ticket)
+
+
 
 def main() -> None:
     """Jalankan Jenny Tools sebagai MCP stdio server."""

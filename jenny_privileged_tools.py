@@ -653,3 +653,130 @@ def run_approved_command(
             "Gagal menjalankan command terkontrol",
             f"{type(exc).__name__}: {exc}",
         )
+
+
+# =============================================================================
+# MT5 TRADING — PRIVILEGED
+# =============================================================================
+
+def _mt5_call(func_name: str, *args, **kwargs):
+    """Panggil fungsi di mt5_trading_tool lewat importlib."""
+    import importlib
+
+    mod = importlib.import_module("mt5_trading_tool")
+    fn = getattr(mod, func_name)
+    return fn(*args, **kwargs)
+
+
+def mt5_market_order(
+    symbol: str,
+    action: str,
+    volume: float,
+    sl: float | None = None,
+    tp: float | None = None,
+    comment: str = "Jenny MCP",
+) -> dict[str, Any]:
+    """Market order (buy/sell) di MT5 — wajib approval."""
+    from approval_store import create_approval_request
+
+    details = f"Market {action} {volume} lot {symbol}"
+    if sl:
+        details += f" SL={sl}"
+    if tp:
+        details += f" TP={tp}"
+
+    create_approval_request(
+        tool="mt5_market_order",
+        action=details,
+    )
+
+    return _mt5_call(
+        "mt5_market_order",
+        symbol=symbol,
+        action=action,
+        volume=volume,
+        sl=sl,
+        tp=tp,
+        comment=comment,
+    )
+
+
+def mt5_modify_trade(
+    ticket: int,
+    sl: float | None = None,
+    tp: float | None = None,
+) -> dict[str, Any]:
+    """Ubah SL/TP posisi terbuka — wajib approval."""
+    from approval_store import create_approval_request
+
+    details = f"Posisi #{ticket}"
+    if sl:
+        details += f" SL→{sl}"
+    if tp:
+        details += f" TP→{tp}"
+
+    create_approval_request(
+        tool="mt5_modify_trade",
+        action=details,
+    )
+
+    return _mt5_call("mt5_modify_trade", ticket=ticket, sl=sl, tp=tp)
+
+
+def mt5_close_trade(
+    ticket: int,
+    volume: float | None = None,
+) -> dict[str, Any]:
+    """Tutup posisi terbuka — wajib approval."""
+    from approval_store import create_approval_request
+
+    vol_str = f"{volume} lot from " if volume else ""
+    create_approval_request(
+        tool="mt5_close_trade",
+        action=f"Close {vol_str}posisi #{ticket}",
+    )
+
+    return _mt5_call("mt5_close_trade", ticket=ticket, volume=volume)
+
+
+def mt5_create_pending(
+    symbol: str,
+    action: str,
+    volume: float,
+    price: float,
+    sl: float | None = None,
+    tp: float | None = None,
+    comment: str = "Jenny MCP",
+    expiration: float | None = None,
+) -> dict[str, Any]:
+    """Buat pending order — wajib approval."""
+    from approval_store import create_approval_request
+
+    create_approval_request(
+        tool="mt5_create_pending",
+        action=f"Pending {action} {volume} lot {symbol} @ {price}",
+    )
+
+    return _mt5_call(
+        "mt5_create_pending",
+        symbol=symbol,
+        action=action,
+        volume=volume,
+        price=price,
+        sl=sl,
+        tp=tp,
+        comment=comment,
+        expiration=expiration,
+    )
+
+
+def mt5_cancel_order(ticket: int) -> dict[str, Any]:
+    """Batalkan pending order — wajib approval."""
+    from approval_store import create_approval_request
+
+    create_approval_request(
+        tool="mt5_cancel_order",
+        action=f"Cancel pending order #{ticket}",
+    )
+
+    return _mt5_call("mt5_cancel_order", ticket=ticket)
