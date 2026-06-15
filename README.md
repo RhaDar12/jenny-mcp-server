@@ -23,6 +23,7 @@ Dibangun dengan arsitektur **stdio MCP** + **privileged approval system**, cocok
 | **🐙 GitHub CLI** | Cek auth, repo list/view/clone, SSH key management |
 | **🔐 Credential Diagnostics** | Periksa token & SSH key tanpa mengekspos isinya |
 | **📊 Market Watch** | Scan XAUUSD/GBPUSD/EURUSD M5 — liquidity sweep, S&R, R:R, session filter |
+| **💰 MT5 Trading** | Account info, positions, pending orders, trade history — market order, modify SL/TP, close, pending order, cancel |
 
 ## 🏗️ Arsitektur
 
@@ -98,7 +99,43 @@ cd C:\AI-Agent\tools
 py cli_roblox_studio.py serve
 ```
 
-Plugin tersedia di: `C:\Users\<user>\AppData\Local\Roblox\Plugins\JennyRobloxBridge.rbxmx`
+Plugin tersedia di: `C:\\Users\\<user>\\AppData\\Local\\Roblox\\Plugins\\JennyRobloxBridge.rbxmx`
+
+## 💰 MT5 Trading Integration
+
+Berinteraksi dengan MetaTrader 5 broker (Exness) untuk data akun dan eksekusi trading.
+
+### Read-Only Tools (tanpa konfirmasi)
+
+| Tool MCP | Deskripsi |
+|----------|-----------|
+| `mt5_account` | Balance, equity, margin, leverage, profit |
+| `mt5_positions` | Semua posisi terbuka — ticket, symbol, volume, profit, SL/TP |
+| `mt5_pending_orders` | Daftar pending order buy/sell limit & stop |
+| `mt5_trade_history` | Riwayat transaksi N hari terakhir |
+
+### Privileged Tools (butuh approval manual)
+
+Semua eksekusi trading **wajib disetujui** via `approve_mcp_action.py`:
+
+| Tool MCP | Deskripsi |
+|----------|-----------|
+| `mt5_order` | Market buy/sell — auto hitung volume step, SL/TP |
+| `mt5_modify` | Ubah SL/TP posisi terbuka |
+| `mt5_close` | Tutup posisi (partial/full close) |
+| `mt5_pending` | Buat pending order (buy_limit, sell_limit, buy_stop, sell_stop) |
+| `mt5_cancel` | Batalkan pending order |
+
+### Persyaratan
+
+- **MetaTrader 5** harus terinstall dan login ke akun demo/real
+- **Python package `MetaTrader5`** terinstall di MCP server Python
+- Symbol Exness menggunakan suffix `m` (XAUUSDm, EURUSDm, GBPUSDm) — otomatis diresolve
+
+```powershell
+# Install MT5 package
+py -m pip install MetaTrader5
+```
 
 ## 🔧 Environment Variables
 
@@ -109,6 +146,8 @@ Plugin tersedia di: `C:\Users\<user>\AppData\Local\Roblox\Plugins\JennyRobloxBri
 | `JENNY_APPROVAL_DIR` | `C:\AI-Agent\approvals` | Direktori ticket approval |
 | `JENNY_SHELL_ROOT` | `C:\AI-Agent` | Root untuk eksekusi shell |
 | `ROBLOX_OPEN_CLOUD_API_KEY` | — | API key untuk publish Roblox place |
+
+> **Catatan:** MT5 trading tools tidak memerlukan environment variable tambahan — koneksi MT5 menggunakan akun yang sudah login di terminal MT5.
 
 ## 📋 Tool Prefix
 
@@ -123,7 +162,12 @@ Semua tool diregistrasi dengan prefix `mcp_jenny_tools_`:
 | `mcp_jenny_tools_comfy_generate` | Generate gambar |
 | `mcp_jenny_tools_document_read` | Baca DOCX/XLSX/PDF |
 | `mcp_jenny_tools_market_watch` | Scan M5 market — liquidity sweep entry |
-| ...dan 30+ tool lainnya | |
+| `mcp_jenny_tools_mt5_account` | Info akun MT5 |
+| `mcp_jenny_tools_mt5_positions` | Posisi terbuka |
+| `mcp_jenny_tools_mt5_order` | Market buy/sell (privileged) |
+| `mcp_jenny_tools_mt5_modify` | Ubah SL/TP (privileged) |
+| `mcp_jenny_tools_mt5_close` | Tutup posisi (privileged) |
+| ...dan 35+ tool lainnya | |
 
 ## 📁 Struktur Folder
 
@@ -134,6 +178,11 @@ C:\AI-Agent\mcp\
 ├── jenny_privileged_tools.py    ← High-risk tools
 ├── approval_store.py            ← Approval ticket system
 ├── approve_mcp_action.py        ← CLI approval tool
+├── tools/
+│   ├── core.py                  ← Shared response helpers
+│   ├── mt5_data_tool.py         ← Market data (tick, OHLC, bundle)
+│   ├── mt5_trading_tool.py      ← Trading execution (account, positions, orders)
+│   └── ...                      ← Other tool modules
 ├── README_SETUP.md              ← Setup instructions (original)
 ├── hermes_config_snippet.yaml   ← Contoh config YAML
 ├── install_mcp.ps1              ← Instalasi script
