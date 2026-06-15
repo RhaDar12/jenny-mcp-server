@@ -13,7 +13,7 @@ from typing import Any, Callable
 
 
 SERVER_VERSION = "2.0.0-privileged-approval"
-DEFAULT_TOOLS_DIR = Path(r"C:\AI-Agent\tools")
+DEFAULT_TOOLS_DIR = Path(__file__).resolve().parent / "tools"
 DEFAULT_LOG_DIR = Path(r"C:\AI-Agent\logs")
 TOOLS_DIR = Path(
     os.environ.get("JENNY_TOOLS_DIR", str(DEFAULT_TOOLS_DIR))
